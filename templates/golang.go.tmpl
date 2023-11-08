@@ -1,0 +1,43 @@
+# Start from the base image
+FROM {{.BaseImage}} as builder
+
+# Add Maintainer Info
+LABEL maintainer="{{.Maintainer}}"
+
+# Set the Current Working Directory inside the container
+WORKDIR {{.WorkingDirectory}}
+
+# Copy go mod and sum files
+COPY {{.LocalSourceDirectory}}/go.mod ./
+COPY {{.LocalSourceDirectory}}/go.sum ./
+
+# Download all dependencies
+RUN go mod download
+
+# Copy the source from the current directory to the Working Directory inside the container
+COPY {{.LocalSourceDirectory}} .
+
+# Build the Go app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o {{.BinaryName}} .
+
+# Start a new stage from scratch
+FROM alpine:latest  
+RUN apk --no-cache add ca-certificates
+
+WORKDIR {{.WorkingDirectory}}
+
+# Copy the Pre-built binary file from the previous stage
+COPY --from=builder {{.WorkingDirectory}}/{{.BinaryName}} .
+
+# Expose port to the outside world
+EXPOSE {{range .ServicePorts}}{{.Port}} {{end}}
+
+# Define environment variables if any
+{{range .EnvironmentVariables -}}
+ENV {{.Name}} {{.Value}}
+{{end}}
+
+
+# Command to run the executable
+CMD ["./{{.BinaryName}}"]
+{{.AdditionalSteps}}

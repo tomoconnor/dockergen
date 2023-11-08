@@ -1,0 +1,17 @@
+---
+maintainer: John Doe <john.doe@example.org>
+base_image: golang:latest
+binary_name: such-a-clever-dog-app
+local_source_directory: /home/user/source
+working_directory: /app # optional
+service_ports:
+  - name: http
+    port: 8080
+  - name: https
+    port: 8081
+
+environment_variables:
+  - name: ENV_VAR_1
+    value: value1
+  - name: ENV_VAR_2
+    value: value2

@@ -1,0 +1,13 @@
+---
+maintainer: John Doe <john.doe@example.org>
+base_image: ubuntu:20.04
+local_source_directory: /home/user/source
+working_directory: /app # optional
+service_ports:
+  - name: http
+    port: 8080
+  - name: https
+    port: 8081
+
+
+exec_command: /bin/busybox httpd -f -p 8080 -h /home/user/source
